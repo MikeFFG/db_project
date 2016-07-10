@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require 'pg'
+require 'io/console'
 
 # SQL contact
 class ExpenseData
@@ -41,6 +42,11 @@ class ExpenseData
     end
   end
 
+  def delete_all_expenses
+    @connection.exec('DELETE FROM expenses')
+    puts 'All expenses have been deleted.'
+  end
+
   private
 
   def display_expenses(expenses)
@@ -75,6 +81,10 @@ class CLI
       @application.search_expenses(arguments[0])
     when 'delete'
       @application.delete_expense(arguments[0])
+    when 'clear'
+      puts 'This will remove all expenses. Are you sure? (y/n)'
+      answer = $stdin.getch
+      @application.delete_all_expenses if answer == 'y'
     else
       display_help
     end
