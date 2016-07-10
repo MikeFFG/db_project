@@ -26,16 +26,31 @@ class ExpenseData
     display_expenses(result)
   end
 
+  def delete_expense(id)
+    sql = 'SELECT * FROM expenses WHERE id = $1'
+    result = @connection.exec_params(sql, [id])
+
+    if result.ntuples == 1
+      sql = 'DELETE FROM expenses WHERE id = $1'
+      @connection.exec_params(sql, [id])
+
+      puts 'The following expense has been deleted:'
+      display_expenses(result)
+    else
+      puts "There is no expense with the id '#{id}'"
+    end
+  end
+
   private
 
   def display_expenses(expenses)
     expenses.each do |tuple|
-      columns = [ tuple["id"].rjust(3),
-                  tuple["created_on"].rjust(10),
-                  tuple["amount"].rjust(12),
-                  tuple["memo"] ]
+      columns = [ tuple['id'].rjust(3),
+                  tuple['created_on'].rjust(10),
+                  tuple['amount'].rjust(12),
+                  tuple['memo'] ]
 
-      puts columns.join(" | ")
+      puts columns.join(' | ')
     end
   end
 end
@@ -58,6 +73,8 @@ class CLI
       @application.add_expense(amount, memo)
     when 'search'
       @application.search_expenses(arguments[0])
+    when 'delete'
+      @application.delete_expense(arguments[0])
     else
       display_help
     end
